@@ -27,6 +27,7 @@ class QuizPage extends StatefulWidget {
 
 class _QuizPageState extends State<QuizPage> {
   int currentQuizQuestionIndex = 0;
+  int scoreCount = 0;
   List<Widget> scoreKeeper = [];
   List<Question> questionBank = [
     Question('You can lead a cow down stairs but not up stairs.', false),
@@ -36,66 +37,93 @@ class _QuizPageState extends State<QuizPage> {
 
   @override
   Widget build(BuildContext context) {
-    Question currentQuizQuestion = questionBank[currentQuizQuestionIndex];
-
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: <Widget>[
-        Expanded(
-          flex: 5,
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Center(
-              child: Text(
-                '${currentQuizQuestion.question}',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 25.0,
-                  color: Colors.white,
+    if (currentQuizQuestionIndex >= questionBank.length) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'You got $scoreCount correct!',
+              style: TextStyle(
+                fontSize: 25.0,
+                color: Colors.white,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  currentQuizQuestionIndex = 0;
+                  scoreCount = 0;
+                  scoreKeeper.clear();
+                });
+              },
+              icon: Icon(Icons.refresh),
+              label: Text('Start Over'),
+            ),
+          ],
+        ),
+      );
+    } else {
+      Question currentQuizQuestion = questionBank[currentQuizQuestionIndex];
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: <Widget>[
+          Expanded(
+            flex: 5,
+            child: Padding(
+              padding: EdgeInsets.all(10.0),
+              child: Center(
+                child: Text(
+                  '${currentQuizQuestion.question}',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 25.0,
+                    color: Colors.white,
+                  ),
                 ),
               ),
             ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
-              child: Text(
-                'True',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(15.0),
+              child: FlatButton(
+                textColor: Colors.white,
+                color: Colors.green,
+                child: Text(
+                  'True',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 20.0,
+                  ),
                 ),
+                onPressed: () => submitAnswer(currentQuizQuestion, true),
               ),
-              onPressed: () => submitAnswer(currentQuizQuestion, true),
             ),
           ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              color: Colors.red,
-              child: Text(
-                'False',
-                style: TextStyle(
-                  fontSize: 20.0,
-                  color: Colors.white,
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.all(15.0),
+              child: FlatButton(
+                color: Colors.red,
+                child: Text(
+                  'False',
+                  style: TextStyle(
+                    fontSize: 20.0,
+                    color: Colors.white,
+                  ),
                 ),
+                onPressed: () => submitAnswer(currentQuizQuestion, false),
               ),
-              onPressed: () => submitAnswer(currentQuizQuestion, false),
             ),
           ),
-        ),
-        Row(
-          children: scoreKeeper,
-        )
-      ],
-    );
+          Row(
+            children: scoreKeeper,
+          )
+        ],
+      );
+    }
   }
 
   void submitAnswer(Question quizQuestion, bool answerSubmitted) {
@@ -105,6 +133,7 @@ class _QuizPageState extends State<QuizPage> {
           Icons.check,
           color: Colors.green,
         ));
+        scoreCount++;
       } else {
         scoreKeeper.add(Icon(
           Icons.close,
@@ -112,15 +141,7 @@ class _QuizPageState extends State<QuizPage> {
         ));
       }
 
-      if (++currentQuizQuestionIndex >= questionBank.length) {
-        currentQuizQuestionIndex = 0;
-      }
+      currentQuizQuestionIndex++;
     });
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
