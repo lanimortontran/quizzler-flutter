@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:quizzler/question.dart';
+import 'package:quizzler/quiz_brain.dart';
+
+QuizBrain quizBrain = QuizBrain();
 
 void main() => runApp(Quizzler());
 
@@ -26,45 +29,38 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
-  int currentQuizQuestionIndex = 0;
   int scoreCount = 0;
   List<Widget> scoreKeeper = [];
-  List<Question> questionBank = [
-    Question('You can lead a cow down stairs but not up stairs.', false),
-    Question('Approximately one quarter of human bones are in the feet.', true),
-    Question('A slug\'s blood is green.', true),
-  ];
 
   @override
   Widget build(BuildContext context) {
-    if (currentQuizQuestionIndex >= questionBank.length) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'You got $scoreCount correct!',
-              style: TextStyle(
-                fontSize: 25.0,
-                color: Colors.white,
-              ),
+    if (quizBrain.getCurrentQuestionNumber() >= quizBrain.getTotalOfQuestions()) {
+      return AlertDialog(
+        title: Text('Finished Quiz'),
+        content: SingleChildScrollView(
+          child: Text(
+            'You got $scoreCount correct!',
+            style: TextStyle(
+              fontSize: 25.0,
             ),
-            TextButton.icon(
-              onPressed: () {
-                setState(() {
-                  currentQuizQuestionIndex = 0;
-                  scoreCount = 0;
-                  scoreKeeper.clear();
-                });
-              },
-              icon: Icon(Icons.refresh),
-              label: Text('Start Over'),
-            ),
-          ],
+          ),
         ),
+        actions: [
+          TextButton.icon(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                quizBrain.reset();
+                scoreCount = 0;
+                scoreKeeper.clear();
+              });
+            },
+            label: Text('Start Over'),
+          )
+        ],
       );
     } else {
-      Question currentQuizQuestion = questionBank[currentQuizQuestionIndex];
+      Question currentQuizQuestion = quizBrain.getQuestion();
       return Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -141,7 +137,7 @@ class _QuizPageState extends State<QuizPage> {
         ));
       }
 
-      currentQuizQuestionIndex++;
+      quizBrain.goToNextQuestion();
     });
   }
 }
